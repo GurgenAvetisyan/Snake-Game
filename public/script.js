@@ -24,7 +24,8 @@ let direction;
 let score;
 let game;
 let snake;
-let food;
+let foods;
+let bigFood = null;
 let started = false;
 
 function startGame() {
@@ -32,10 +33,7 @@ function startGame() {
   direction = "RIGHT";
   score = 0;
   document.getElementById("score").innerText = "0";
-  food = {
-    x: Math.floor(Math.random() * 20),
-    y: Math.floor(Math.random() * 20),
-  };
+  foods = generateRandomFood(20, snake, 2);
 
   if (game) clearInterval(game);
   game = setInterval(moveSnake, 200);
@@ -51,15 +49,73 @@ function gameOver() {
   gameBox.appendChild(gameOverDiv);
 }
 
-function draw() {
+function renderFoods(foods, bigFood, boxSize, gameBox) {
   gameBox.innerHTML = "";
 
-  const foodDiv = document.createElement("div");
-  foodDiv.classList.add("food");
-  foodDiv.style.left = food.x * boxSize + "px";
-  foodDiv.style.top = food.y * boxSize + "px";
-  foodDiv.style.borderRadius = "50%";
-  gameBox.appendChild(foodDiv);
+  foods.forEach(({ x, y }) => {
+    const foodDiv = document.createElement("div");
+    foodDiv.className = "food";
+    Object.assign(foodDiv.style, {
+      left: `${x * boxSize}px`,
+      top: `${y * boxSize}px`,
+      width: `${boxSize}px`,
+      height: `${boxSize}px`,
+    });
+    gameBox.appendChild(foodDiv);
+  });
+
+  if (bigFood) {
+    const bigDiv = document.createElement("div");
+    bigDiv.className = "food";
+    Object.assign(bigDiv.style, {
+      left: `${bigFood.x * boxSize}px`,
+      top: `${bigFood.y * boxSize}px`,
+      width: `${boxSize * 1.5}px`,
+      height: `${boxSize * 1.5}px`,
+    });
+    gameBox.appendChild(bigDiv);
+  }
+}
+
+function generateRandomFood(gridSize, snake, maxCount = 3) {
+  const foodCount = Math.floor(Math.random() * maxCount) + 1;
+  const foods = [];
+
+  while (foods.length < foodCount) {
+    const newFood = {
+      x: Math.floor(Math.random() * gridSize),
+      y: Math.floor(Math.random() * gridSize),
+    };
+
+    const overlaps =
+      foods.some((f) => f.x === newFood.x && f.y === newFood.y) ||
+      snake.some((s) => s.x === newFood.x && s.y === newFood.y);
+
+    if (!overlaps) {
+      foods.push(newFood);
+    }
+  }
+
+  return foods;
+}
+
+function generateBigFood(gridSize, snake, foods) {
+  let newFood;
+  do {
+    newFood = {
+      x: Math.floor(Math.random() * gridSize),
+      y: Math.floor(Math.random() * gridSize),
+    };
+  } while (
+    foods.some((f) => f.x === newFood.x && f.y === newFood.y) ||
+    snake.some((s) => s.x === newFood.x && s.y === newFood.y)
+  );
+
+  return newFood;
+}
+
+function draw() {
+  renderFoods(foods, bigFood, boxSize, gameBox);
 
   snake.forEach((segment, index) => {
     const segDiv = document.createElement("div");
@@ -101,20 +157,38 @@ function moveSnake() {
     return;
   }
 
-  if (head.x === food.x && head.y === food.y) {
+  const ateFoodIndex = foods.findIndex(
+    (food) => head.x === food.x && head.y === food.y
+  );
+
+  const ateBigFood = bigFood && head.x === bigFood.x && head.y === bigFood.y;
+
+  if (ateFoodIndex !== -1) {
     snake.unshift(head);
     score++;
     scoreText.innerText = score;
-    food = {
-      x: Math.floor(Math.random() * 20),
-      y: Math.floor(Math.random() * 20),
-    };
+    foods.splice(ateFoodIndex, 1);
+    eatSound.play().catch(() => {});
+
+    if (foods.length === 0) {
+      foods = generateRandomFood(20, snake, 2);
+
+      if (Math.random() < 0.3) {
+        bigFood = generateBigFood(20, snake, foods);
+      }
+    }
+  } else if (ateBigFood) {
+    snake.unshift(head);
+    const extraSegment = { ...head };
+    snake.unshift(extraSegment);
+    score += 2;
+    scoreText.innerText = score;
+    bigFood = null;
     eatSound.play().catch(() => {});
   } else {
     snake.pop();
     snake.unshift(head);
   }
-  console.log(snake, "snake");
 
   draw();
 }
