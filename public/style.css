@@ -1,3 +1,4 @@
+
 body {
   font-family: sans-serif;
   background: #111;
@@ -28,7 +29,6 @@ body {
 }
 
 .segment,
-.food,
 head {
   width: 20px;
   height: 20px;
@@ -50,6 +50,8 @@ head {
 }
 
 .food {
+  position: absolute;
+  box-sizing: border-box;
   background-image: url("./apple.png");
   background-size: cover;
   background-position: center;
