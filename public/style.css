@@ -1,0 +1,57 @@
+body {
+  font-family: sans-serif;
+  background: #111;
+  color: white;
+  text-align: center;
+}
+
+#game {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  margin: 0 auto;
+  background: #222;
+  border: 2px solid #444;
+}
+
+.gameOver {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  color: red;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 20px 30px;
+  border-radius: 10px;
+  z-index: 10;
+}
+
+.segment,
+.food,
+head {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.segment {
+  background: #a0c431;
+  border-radius: 50%;
+}
+
+.head {
+  background-color: transparent;
+  background-image: url("./snakeHead.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.food {
+  background-image: url("./apple.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}

@@ -1,0 +1,8 @@
+services:
+  snake-game:
+    image: httpd:alpine
+    container_name: snake-game
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public:/usr/local/apache2/htdocs/
